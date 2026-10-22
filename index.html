@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101820">
+  <meta name="description" content="Ti-Eye phone-first football recording prototype">
+  <title>Ti-Eye — Camera Fix</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon-192.png">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-mark">TE</div>
+    <div class="brand-copy"><h1>TI-EYE</h1><p>PHONE CAMERA PROTOTYPE · A16 PROFILE</p></div>
+    <span class="version">V0.3.1 FIX</span>
+  </header>
+
+  <main class="layout">
+    <section class="panel camera-panel">
+      <div class="section-head">
+        <div><h2>Camera</h2><p class="muted">Put your phone on a stable stand, in landscape orientation.</p></div>
+        <span id="liveBadge" class="badge badge-off">CAMERA OFF</span>
+      </div>
+      <div class="preview-shell">
+        <video id="sourceVideo" autoplay muted playsinline webkit-playsinline></video>
+        <canvas id="previewCanvas" width="1280" height="720" aria-label="Camera preview with digital framing"></canvas>
+        <div id="previewPlaceholder" class="preview-placeholder">
+          <div class="camera-symbol">◉</div>
+          <strong>Your camera preview will appear here</strong>
+          <span>Tap Start Camera. Permission is requested only after your tap.</span>
+        </div>
+        <div id="previewOverlay" class="preview-overlay"><span id="overlayMode">FULL PITCH</span><span id="aiOverlay">AI OFF</span></div>
+      </div>
+      <div class="camera-actions">
+        <button id="startCameraBtn" class="btn btn-primary">Start Camera</button>
+        <button id="retryCameraBtn" class="btn btn-secondary" hidden>Retry Camera</button>
+        <button id="stopCameraBtn" class="btn btn-danger" disabled>Stop</button>
+      </div>
+      <div class="status-card" role="status" aria-live="polite">
+        <div class="status-line"><span id="statusDot" class="status-dot"></span><strong id="cameraStatusTitle">Waiting for camera</strong></div>
+        <p id="cameraStatusText">Open this app from its HTTPS link in Chrome. The camera cannot be opened from a normal file:// link.</p>
+        <details><summary>Camera diagnostics</summary><dl class="diagnostics">
+          <dt>Secure context</dt><dd id="diagSecure">Checking…</dd>
+          <dt>Browser camera API</dt><dd id="diagApi">Checking…</dd>
+          <dt>Permission</dt><dd id="diagPermission">Not requested</dd>
+          <dt>Stream</dt><dd id="diagStream">Stopped</dd>
+          <dt>Resolution</dt><dd id="diagResolution">—</dd>
+          <dt>Last error</dt><dd id="diagError">None</dd>
+        </dl></details>
+      </div>
+    </section>
+
+    <section class="panel settings-panel">
+      <div class="section-head"><div><h2>Digital camera</h2><p class="muted">The phone remains fixed; software reframes the view.</p></div></div>
+      <div class="segmented" role="group" aria-label="Camera framing mode">
+        <button id="fullPitchBtn" class="segment active" aria-pressed="true">Full pitch</button>
+        <button id="aiFollowBtn" class="segment" aria-pressed="false">AI follow</button>
+      </div>
+      <label class="field-label" for="zoomRange">Digital zoom <span id="zoomValue">1.0×</span></label>
+      <input id="zoomRange" type="range" min="1" max="2.4" step="0.1" value="1">
+      <div class="range-scale"><span>Whole view</span><span>More crop</span></div>
+      <div class="control-pad" aria-label="Manual digital framing controls">
+        <button id="panLeftBtn" class="pad-btn" aria-label="Frame left">←</button>
+        <button id="tiltUpBtn" class="pad-btn" aria-label="Frame up">↑</button>
+        <button id="recenterBtn" class="pad-btn pad-center">Re-center</button>
+        <button id="tiltDownBtn" class="pad-btn" aria-label="Frame down">↓</button>
+        <button id="panRightBtn" class="pad-btn" aria-label="Frame right">→</button>
+      </div>
+      <button id="enableAiBtn" class="btn btn-secondary btn-wide" disabled>Enable experimental ball AI</button>
+      <p id="aiStatus" class="helper">AI is optional. Camera preview and recording should work even if the AI model cannot download.</p>
+      <div class="metrics-grid">
+        <div class="metric"><span>Tracking</span><strong id="trackingMetric">OFF</strong></div>
+        <div class="metric"><span>Ball confidence</span><strong id="confidenceMetric">—</strong></div>
+        <div class="metric"><span>Direction</span><strong id="directionMetric">—</strong></div>
+        <div class="metric"><span>Output</span><strong id="outputMetric">1280×720</strong></div>
+      </div>
+    </section>
+
+    <section class="panel match-panel">
+      <div class="section-head"><div><h2>Match desk</h2><p class="muted">Match clock, score and event bookmarks.</p></div></div>
+      <div class="team-inputs"><label>Home team<input id="homeName" value="Home" maxlength="30"></label><label>Away team<input id="awayName" value="Away" maxlength="30"></label></div>
+      <div class="scoreboard">
+        <div class="score-team"><span id="homeNameLabel">HOME</span><strong id="homeScore">0</strong><button id="homeGoalBtn" class="btn btn-small">+ Goal</button></div>
+        <div class="score-middle"><div id="matchClock" class="clock">00:00</div><div id="halfLabel" class="half-label">FIRST HALF</div><div class="clock-actions"><button id="clockStartBtn" class="btn btn-small btn-primary">Start</button><button id="clockResetBtn" class="btn btn-small">Reset</button></div></div>
+        <div class="score-team"><span id="awayNameLabel">AWAY</span><strong id="awayScore">0</strong><button id="awayGoalBtn" class="btn btn-small">+ Goal</button></div>
+      </div>
+      <div class="event-buttons">
+        <button data-event="Chance">Chance</button><button data-event="Shot">Shot</button><button data-event="Save">Save</button><button data-event="Foul">Foul</button><button data-event="Yellow card">Yellow card</button><button data-event="Red card">Red card</button><button data-event="Substitution">Substitution</button><button data-event="Highlight">Highlight</button>
+      </div>
+      <div class="event-head"><strong>Match events</strong><div><button id="exportEventsBtn" class="text-btn">Export CSV</button><button id="clearEventsBtn" class="text-btn">Clear</button></div></div>
+      <ol id="eventsList" class="events-list"><li class="empty-events">No events yet. Add one during the match.</li></ol>
+    </section>
+
+    <section class="panel recording-panel">
+      <div class="section-head"><div><h2>Recording</h2><p class="muted">Records the reframed output when supported by the browser.</p></div><span id="recordBadge" class="badge badge-off">NOT RECORDING</span></div>
+      <div class="recording-actions"><button id="recordStartBtn" class="btn btn-primary" disabled>Start Recording</button><button id="recordStopBtn" class="btn btn-danger" disabled>Stop & Save</button></div>
+      <p id="recordStatus" class="helper">Start the camera before recording. Save the downloaded video to your phone's Files/Gallery location.</p>
+      <div class="note"><strong>Important:</strong> keep the app open and the screen awake during a match. For a long recording, test a short clip first and check the downloaded video before recording a full match.</div>
+    </section>
+  </main>
+
+  <footer>Ti-Eye is an experimental prototype. Ball detection can lose the ball; verify footage before relying on it for match analysis.</footer>
+  <script src="./app.js" defer></script>
+</body>
+</html>
