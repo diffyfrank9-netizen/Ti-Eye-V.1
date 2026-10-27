@@ -65,6 +65,7 @@
   }
   function setCameraUi(on) {
     state.cameraOn = on;
+    document.body.classList.toggle('camera-online', on);
     $('startCameraBtn').disabled = on || state.opening;
     $('retryCameraBtn').hidden = on;
     $('stopCameraBtn').disabled = !on;
@@ -363,6 +364,70 @@
       navigator.serviceWorker.register('./sw.js').catch(() => { /* PWA caching is optional; never block camera start. */ });
     }
   }
+  // The hosted Tisini logo is decorative; if the network is unavailable, keep the header branded.
+  const tisiniLogo = $('tisiniLogo');
+  if (tisiniLogo) {
+    const showLogoFallback = () => { tisiniLogo.hidden = true; $('tisiniLogoFallback').hidden = false; };
+    tisiniLogo.addEventListener('error', showLogoFallback, { once: true });
+    if (tisiniLogo.complete && !tisiniLogo.naturalWidth) showLogoFallback();
+  }
+
+  // Full-screen camera mode is presentation-only: it does not replace the source stream,
+  // canvas renderer, MediaRecorder stream, or the existing download/save path.
+  let focusModeActive = false;
+  let nativeFullscreenActive = false;
+  async function toggleCameraFullscreen() {
+    const entering = !focusModeActive;
+    focusModeActive = entering;
+    document.body.classList.toggle('camera-focus-mode', entering);
+    const button = $('fullscreenBtn');
+    button.setAttribute('aria-label', entering ? 'Exit full-screen camera' : 'Open full-screen camera');
+    button.title = entering ? 'Exit full screen' : 'Full-screen camera';
+    if (entering) {
+      try {
+        if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
+          await document.documentElement.requestFullscreen({ navigationUI: 'hide' });
+          nativeFullscreenActive = true;
+        }
+      } catch (_) { nativeFullscreenActive = false; }
+      try {
+        if (screen.orientation && typeof screen.orientation.lock === 'function') {
+          await screen.orientation.lock('landscape');
+        }
+      } catch (_) { /* Orientation locking is optional and unsupported on some devices. */ }
+    } else {
+      if (document.fullscreenElement && document.exitFullscreen) {
+        try { await document.exitFullscreen(); } catch (_) { /* CSS focus mode still exits. */ }
+      }
+      nativeFullscreenActive = false;
+      try { if (screen.orientation && typeof screen.orientation.unlock === 'function') screen.orientation.unlock(); } catch (_) {}
+    }
+  }
+  function leaveCameraFullscreen() {
+    if (!focusModeActive) return;
+    focusModeActive = false;
+    document.body.classList.remove('camera-focus-mode');
+    const button = $('fullscreenBtn');
+    button.setAttribute('aria-label', 'Open full-screen camera');
+    button.title = 'Full-screen camera';
+    if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+    nativeFullscreenActive = false;
+    try { if (screen.orientation && typeof screen.orientation.unlock === 'function') screen.orientation.unlock(); } catch (_) {}
+  }
+  $('fullscreenBtn').addEventListener('click', toggleCameraFullscreen);
+  document.addEventListener('fullscreenchange', () => {
+    // If the browser's native full screen is dismissed with Back/Escape, also exit CSS focus mode.
+    if (!document.fullscreenElement && focusModeActive && nativeFullscreenActive) {
+      focusModeActive = false;
+      nativeFullscreenActive = false;
+      document.body.classList.remove('camera-focus-mode');
+      $('fullscreenBtn').setAttribute('aria-label', 'Open full-screen camera');
+      $('fullscreenBtn').title = 'Full-screen camera';
+      try { if (screen.orientation && typeof screen.orientation.unlock === 'function') screen.orientation.unlock(); } catch (_) {}
+    }
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && focusModeActive && !document.fullscreenElement) leaveCameraFullscreen(); });
+
   // Wire all controls only after the DOM is ready (script is deferred).
   $('startCameraBtn').addEventListener('click', startCamera);
   $('retryCameraBtn').addEventListener('click', startCamera);
