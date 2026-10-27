@@ -1,13 +1,13 @@
 {
-  "name": "Ti-Eye Football Camera",
+  "name": "Ti-Eye by Tisini",
   "short_name": "Ti-Eye",
-  "description": "Phone-first football camera prototype with camera diagnostics, experimental ball tracking and match tagging.",
+  "description": "A simple full-screen sports recording camera by Tisini.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "landscape",
-  "background_color": "#0c1218",
-  "theme_color": "#101820",
+  "background_color": "#061a3b",
+  "theme_color": "#082b63",
   "icons": [
     { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
     { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }

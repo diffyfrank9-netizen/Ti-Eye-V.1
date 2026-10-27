@@ -1,43 +1,27 @@
-# Ti-Eye A16 Camera Fix — V0.3.1
+# Ti-Eye by Tisini — Blue Full-Screen UI v1
 
-This is a corrected, lightweight static PWA package for early field testing on a Samsung Galaxy A16. It is a best-effort rebuilt package based on the Ti-Eye features and camera failure description available in the conversation; it is not the inaccessible original ZIP binary and it is not an APK.
+This package simplifies the existing Ti-Eye phone-camera interface for field testing on a Samsung Galaxy A16. The camera acquisition, canvas rendering, optional ball detector, MediaRecorder capture, and video download/save code from the supplied project have been retained. The new interface has not yet been field-tested; test it on the phone before replacing the live version.
 
-## Main corrections
+## What's changed
 
-- Camera access only starts when the user taps **Start Camera**.
-- Secure-context and `getUserMedia` support checks are shown in the diagnostics panel.
-- Rear camera is preferred using *ideal* settings, with fallbacks to less restrictive constraints and then `{ video: true, audio: false }`.
-- The same single MediaStream powers preview; no second camera open is made for recording.
-- The video element uses muted/autoplay/playsinline and `srcObject`, waits for metadata, calls `play()`, and reports failures.
-- AI is a separate optional action. If the AI libraries/model cannot download or inference fails, camera preview remains available.
-- Recording uses the canvas-framed output when `MediaRecorder` and `canvas.captureStream` are supported. It downloads a WebM file when stopped. A short test recording is recommended.
-- Match score, clock, event bookmarks, and CSV export are included.
-- Service worker uses a versioned cache and deletes older `ti-eye-*` caches; external AI libraries/models are not cached by it.
+- Blue Tisini-style background and Tisini branding in the header. The official logo is loaded from `https://www.tisini.co.ke/tisini-logo.png`; a text fallback appears if it cannot load.
+- The camera preview is the main focus. Advanced digital framing and the match desk are collapsed until opened.
+- Added a **Full screen** button. Where supported, it enters native browser full screen and requests landscape orientation; otherwise it uses a full-viewport layout inside the browser.
+- Larger, clearer **Start Recording** and **Stop & Save** controls are kept beside the preview.
+- Bumped the service-worker cache name so GitHub Pages clients can pick up the new UI.
 
-## IMPORTANT: how to open the camera
+## Deploy with GitHub Desktop
 
-The phone camera requires a secure context. A normal `file://` link to `index.html` is expected to fail. Upload these files to a static HTTPS host such as GitHub Pages, Cloudflare Pages, or another free HTTPS static host, then open the public `https://...` address directly in Chrome on the phone. Do not use an embedded preview in an editor.
+1. Keep a backup of the currently live repository first.
+2. Extract this ZIP on your computer. Open the `Ti-Eye-V.1-main` folder and copy its contents (`index.html`, `app.js`, `styles.css`, `manifest.webmanifest`, `sw.js`, `icons/`, and `README.md`) into the root of your existing `Ti-Eye-V.1` repository. Do not delete the `.git` folder in your repository.
+3. Use GitHub Desktop to review the changed files, commit with a message such as `Simplify Ti-Eye UI and add full-screen camera`, then push to `main`. GitHub Pages should redeploy automatically.
+4. Open the deployed HTTPS link in Chrome on the Samsung A16. If the old cached page appears, refresh the page or close and reopen it.
+5. Test in this order: Start Camera, confirm live preview, Start Recording for 10 seconds, Stop & Save, and play the downloaded WebM. Then tap **Full screen** and repeat a short test.
 
-1. Extract this ZIP.
-2. Upload the contents of the `Ti-Eye-A16-Camera-Fix` folder to a static HTTPS host (the `index.html` must be at the published root).
-3. Open the public HTTPS URL in Chrome on your Samsung A16.
-4. Tap **Start Camera** and choose **Allow** when asked.
-5. If it was previously denied, open Chrome's site settings for the URL and allow Camera; also confirm Android Settings → Apps → Chrome → Permissions → Camera.
-6. Try a short camera test first, then a 10-second recording and check the downloaded WebM.
+## Important
 
-## AI limitations
-
-The optional experimental ball detector loads TensorFlow.js and COCO-SSD from a CDN, so it requires internet access when enabling AI. It is a generic `sports ball` detector and is not a trained football match detector. For this reason, the camera preview does not depend on AI loading. On a far-away pitch, the ball may be missed or confused with other objects.
-
-## Testing status
-
-This package has not been physically tested on the user's Samsung Galaxy A16. Browsers, site permissions, firmware, and hosting configuration can differ. Use the visible diagnostics panel to identify whether failure is due to insecure hosting, missing camera API, permission, camera contention, or playback.
-
-## Files
-
-- `index.html` — app layout
-- `app.js` — camera, diagnostics, digital framing, optional AI, recording, match desk
-- `styles.css` — responsive interface
-- `manifest.webmanifest` — PWA settings
-- `sw.js` — versioned/offline shell caching
-- `icons/` — app icons
+- This ZIP does not itself update the public GitHub Pages site. The changes go live only after you commit and push them to the repository.
+- The camera requires an HTTPS page and user permission. Do not test via a `file://` URL.
+- Full-screen and orientation-lock support varies between mobile browsers. The layout falls back to filling the available page viewport if native full screen is unavailable.
+- Video is downloaded as WebM using the existing browser recording path. Confirm the downloaded file on your phone before recording a full match.
+- AI ball detection remains experimental, optional, and dependent on downloading its libraries/model. Core camera recording does not depend on AI loading.
